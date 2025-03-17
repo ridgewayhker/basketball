@@ -18,7 +18,7 @@
     <form id="bookingForm">
       <label for="bookingDate">Select Booking Date:</label>
       <select id="bookingDate" name="bookingDate">
-        <!-- Options will be populated by JavaScript -->
+        <!-- Populated by JavaScript -->
       </select>
       
       <label for="teenName">Your Name:</label>
@@ -35,17 +35,17 @@
     // Use your actual Web App URL from Apps Script
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
-    // Fetch available dates and populate the dropdown
+    // Load available dates and populate the dropdown
     function loadDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
           const dropdown = document.getElementById("bookingDate");
           dropdown.innerHTML = "";
-          dates.forEach(date => {
+          dates.forEach(dateVal => {
             const option = document.createElement("option");
-            option.value = date;
-            option.textContent = date;
+            option.value = dateVal;
+            option.textContent = dateVal;
             dropdown.appendChild(option);
           });
         })
@@ -78,7 +78,7 @@
       .catch(err => console.error("Error submitting booking:", err));
     });
 
-    // Load dates when the page loads
+    // Load dates on page load
     window.addEventListener("load", loadDates);
   </script>
 </body>
