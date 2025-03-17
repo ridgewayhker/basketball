@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Basketball Booking</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
@@ -18,39 +18,38 @@
     <form id="bookingForm">
       <label for="bookingDate">Select Booking Date:</label>
       <select id="bookingDate" name="bookingDate">
-        <!-- Populated by JavaScript -->
+        <!-- Options will be populated by JavaScript -->
       </select>
-      
       <label for="teenName">Your Name:</label>
-      <input type="text" id="teenName" name="teenName" required />
-      
+      <input type="text" id="teenName" name="teenName" required>
       <label for="parentName">Parent's Name:</label>
-      <input type="text" id="parentName" name="parentName" required />
-      
+      <input type="text" id="parentName" name="parentName" required>
       <button type="submit">Book Now</button>
     </form>
   </div>
   
   <script>
-    // Use your actual Web App URL from Apps Script
+    // Replace with your actual Apps Script Web App URL
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
+    // Load available dates and populate the dropdown
     function loadDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
           const dropdown = document.getElementById("bookingDate");
           dropdown.innerHTML = "";
-          dates.forEach(dateVal => {
+          dates.forEach(date => {
             const option = document.createElement("option");
-            option.value = dateVal;
-            option.textContent = dateVal;
+            option.value = date;
+            option.textContent = date;
             dropdown.appendChild(option);
           });
         })
         .catch(err => console.error("Error loading dates:", err));
     }
 
+    // Handle booking form submission
     document.getElementById("bookingForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const bookingDate = document.getElementById("bookingDate").value;
