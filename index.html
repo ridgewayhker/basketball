@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Basketball Booking</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 500px; margin: auto; }
+    label { display: block; margin-top: 10px; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 15px; padding: 10px 15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Basketball Booking</h1>
+    <form id="bookingForm">
+      <label for="bookingDate">Select Booking Date:</label>
+      <select id="bookingDate" name="bookingDate">
+        <!-- Options will be populated by JavaScript -->
+      </select>
+      
+      <label for="teenName">Your Name:</label>
+      <input type="text" id="teenName" name="teenName" required />
+      
+      <label for="parentName">Parent's Name:</label>
+      <input type="text" id="parentName" name="parentName" required />
+      
+      <button type="submit">Book Now</button>
+    </form>
+  </div>
+  
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
+
+    // Fetch available dates from the Apps Script web app and populate the dropdown
+    function loadDates() {
+      fetch(`${webAppUrl}?action=getDates`)
+        .then(response => response.json())
+        .then(dates => {
+          const dropdown = document.getElementById("bookingDate");
+          dates.forEach(date => {
+            const option = document.createElement("option");
+            option.value = date;
+            option.textContent = date;
+            dropdown.appendChild(option);
+          });
+        })
+        .catch(err => console.error("Error loading dates:", err));
+    }
+
+    // Handle booking form submission
+    document.getElementById("bookingForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const bookingDate = document.getElementById("bookingDate").value;
+      const teenName = document.getElementById("teenName").value;
+      const parentName = document.getElementById("parentName").value;
+      
+      const params = new URLSearchParams();
+      params.append("action", "submitBooking");
+      params.append("bookingDate", bookingDate);
+      params.append("teenName", teenName);
+      params.append("parentName", parentName);
+      
+      fetch(webAppUrl, {
+        method: "POST",
+        body: params
+      })
+      .then(response => response.text())
+      .then(result => {
+        alert(result);
+        document.getElementById("bookingForm").reset();
+      })
+      .catch(err => console.error("Error submitting booking:", err));
+    });
+
+    // Load dates when the page loads
+    window.addEventListener("load", loadDates);
+  </script>
+</body>
+</html>
