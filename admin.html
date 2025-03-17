@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - Basketball Booking</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 600px; margin: auto; }
+    label { display: block; margin-top: 10px; }
+    input, button { width: 100%; padding: 8px; margin-top: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Panel</h1>
+    <h2>Add New Booking Date</h2>
+    <form id="dateForm">
+      <label for="newDate">New Booking Date:</label>
+      <input type="date" id="newDate" name="newDate" required />
+      <button type="submit">Add Date</button>
+    </form>
+    
+    <h2>Current Bookings</h2>
+    <table id="bookingsTable">
+      <thead>
+        <tr>
+          <th>Booking Date</th>
+          <th>Teen Name</th>
+          <th>Parent Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Booking data will be loaded here -->
+      </tbody>
+    </table>
+  </div>
+  
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
+
+    // Handle new date submission
+    document.getElementById("dateForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const newDate = document.getElementById("newDate").value;
+      const params = new URLSearchParams();
+      params.append("action", "addDate");
+      params.append("newDate", newDate);
+      
+      fetch(webAppUrl, {
+        method: "POST",
+        body: params
+      })
+      .then(response => response.text())
+      .then(result => {
+        alert(result);
+        document.getElementById("dateForm").reset();
+      })
+      .catch(err => console.error("Error adding date:", err));
+    });
+
+    // Load bookings from the Apps Script web app
+    function loadBookings() {
+      fetch(`${webAppUrl}?action=getBookings`)
+        .then(response => response.json())
+        .then(bookings => {
+          const tbody = document.querySelector("#bookingsTable tbody");
+          tbody.innerHTML = "";
+          bookings.forEach(booking => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${booking.bookingDate}</td><td>${booking.teenName}</td><td>${booking.parentName}</td>`;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(err => console.error("Error loading bookings:", err));
+    }
+
+    window.addEventListener("load", loadBookings);
+  </script>
+</body>
+</html>
