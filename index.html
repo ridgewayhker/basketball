@@ -35,7 +35,6 @@
     // Use your actual Web App URL from Apps Script
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
-    // Load available dates and populate the dropdown
     function loadDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
@@ -52,7 +51,6 @@
         .catch(err => console.error("Error loading dates:", err));
     }
 
-    // Handle booking form submission
     document.getElementById("bookingForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const bookingDate = document.getElementById("bookingDate").value;
@@ -78,7 +76,6 @@
       .catch(err => console.error("Error submitting booking:", err));
     });
 
-    // Load dates on page load
     window.addEventListener("load", loadDates);
   </script>
 </body>
