@@ -43,13 +43,21 @@
   </div>
   
   <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
+    // Replace with your actual Apps Script Web App URL
+    const webAppUrl = "YOUR_WEB_APP_URL";
 
-    // Load available dates and populate the dropdown
+    // Fetch available dates, sort descending, then populate dropdown
     function loadDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
+          // Sort dates in descending order
+          dates.sort((a, b) => {
+            const da = new Date(a);
+            const db = new Date(b);
+            return db - da; // descending
+          });
+          
           const dropdown = document.getElementById("bookingDate");
           dropdown.innerHTML = "";
           dates.forEach(date => {
@@ -62,7 +70,7 @@
         .catch(err => console.error("Error loading dates:", err));
     }
 
-    // Load the notes/disclaimer from the server and display it
+    // Load the notes/disclaimer
     function loadNotes() {
       fetch(`${webAppUrl}?action=getNotes`)
         .then(response => response.json())
@@ -75,7 +83,6 @@
     // Handle booking form submission
     document.getElementById("bookingForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      // Check that the disclaimer is accepted
       if (!document.getElementById("acceptDisclaimer").checked) {
         alert("Please accept the notes and disclaimer before booking.");
         return;
