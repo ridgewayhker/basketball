@@ -5,21 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Basketball Booking</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { max-width: 500px; margin: auto; }
-    label { display: block; margin-top: 10px; }
-    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
-    button { margin-top: 15px; padding: 10px 15px; }
-    #notesContainer { margin-top: 15px; border: 1px solid #ccc; padding: 10px; }
+    /* Basic Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #E9EBEE; /* Light background */
+      color: #616771; /* Dark text */
+    }
+    
+    header {
+      background-color: #4267B3; /* Main accent color */
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    header h1 {
+      font-size: 1.8rem;
+    }
+
+    .container {
+      max-width: 500px;
+      background-color: #fff; /* White card */
+      margin: auto;
+      padding: 1.5rem;
+      border: 1px solid #90949C;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    h2 {
+      color: #4267B3; /* Accent color for subheadings */
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin: 1rem 0 0.5rem;
+      font-weight: 600;
+      color: #616771;
+    }
+    
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #90949C;
+      border-radius: 4px;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Disclaimer Container */
+    #notesContainer {
+      background-color: #E9EBEE; 
+      border: 1px solid #90949C;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    #notesContainer strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #4267B3;
+    }
+    #notesText {
+      margin-bottom: 0.5rem;
+      white-space: pre-line; /* Preserves multiline in text */
+    }
+    
+    /* Checkbox */
+    #acceptDisclaimer {
+      margin-right: 0.5rem;
+    }
+    
+    /* Button Styling */
+    button {
+      background-color: #4267B3;
+      color: #fff;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.25rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #616771; /* Darker hover color */
+    }
+    
+    /* Responsive: stack items nicely on small screens */
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <header>
     <h1>Basketball Booking</h1>
+  </header>
+  
+  <div class="container">
+    <h2>Reserve Your Spot</h2>
     <form id="bookingForm">
       <label for="bookingDate">Select Booking Date:</label>
       <select id="bookingDate" name="bookingDate">
-        <!-- Populated by JavaScript -->
+        <!-- Options will be populated by JavaScript -->
       </select>
       
       <label for="teenName">Your Name:</label>
@@ -43,7 +142,7 @@
   </div>
   
   <script>
-    // Use your actual Apps Script Web App URL
+    // Web App URL from your Apps Script
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
     // Sort dates in descending order
@@ -51,11 +150,7 @@
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
-          dates.sort((a, b) => {
-            const da = new Date(a);
-            const db = new Date(b);
-            return db - da; // descending
-          });
+          dates.sort((a, b) => new Date(b) - new Date(a)); // Descending
           const dropdown = document.getElementById("bookingDate");
           dropdown.innerHTML = "";
           dates.forEach(date => {
@@ -68,13 +163,13 @@
         .catch(err => console.error("Error loading dates:", err));
     }
 
-    // Convert newlines to <br> so multiline text displays correctly
+    // Convert multiline text to <br> for display
     function multilineToHtml(str) {
       if (!str) return "";
       return str.replace(/\n/g, "<br>");
     }
 
-    // Load notes/disclaimer from the server
+    // Load the disclaimer note
     function loadNotes() {
       fetch(`${webAppUrl}?action=getNotes`)
         .then(response => response.json())
@@ -85,10 +180,9 @@
         .catch(err => console.error("Error loading notes:", err));
     }
 
-    // Handle booking form submission
+    // Handle booking submission
     document.getElementById("bookingForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      // Ensure user checked the disclaimer
       if (!document.getElementById("acceptDisclaimer").checked) {
         alert("Please accept the notes and disclaimer before booking.");
         return;
@@ -117,6 +211,7 @@
       .catch(err => console.error("Error submitting booking:", err));
     });
 
+    // Load everything on page load
     window.addEventListener("load", () => {
       loadDates();
       loadNotes();
