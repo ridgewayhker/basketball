@@ -73,7 +73,7 @@
     let allBookings = [];
     let allDates = [];
 
-    // (1) Handle new date submission
+    // 1) Add new date
     document.getElementById("dateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const newDate = document.getElementById("newDate").value;
@@ -96,7 +96,7 @@
       .catch(err => console.error("Error adding date:", err));
     });
     
-    // (2) Handle removing an available date
+    // 2) Remove a date
     document.getElementById("removeDateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const dateToRemove = document.getElementById("removeDateSelect").value;
@@ -127,7 +127,7 @@
       .catch(err => console.error("Error removing date:", err));
     });
 
-    // (3) Handle notes update
+    // 3) Update notes
     document.getElementById("notesForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const note = document.getElementById("notesInput").value;
@@ -158,7 +158,7 @@
         .catch(err => console.error("Error loading existing notes:", err));
     }
 
-    // (4) Load all available dates (for both removeDateSelect and datesDropdown)
+    // 4) Load all available dates
     function loadAvailableDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
@@ -208,7 +208,7 @@
       });
     }
     
-    // (5) Load all bookings
+    // 5) Load all bookings
     function loadAllBookings() {
       fetch(`${webAppUrl}?action=getBookings`)
         .then(response => response.json())
@@ -229,7 +229,7 @@
       });
     }
     
-    // Filter bookings when the datesDropdown changes
+    // Filter bookings by selected date
     document.getElementById("datesDropdown").addEventListener("change", function(e) {
       const selectedDate = e.target.value;
       if (selectedDate === "") {
