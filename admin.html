@@ -6,22 +6,30 @@
   <title>Admin Panel - Basketball Booking</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { max-width: 600px; margin: auto; }
+    .container { max-width: 800px; margin: auto; }
     label { display: block; margin-top: 10px; }
     input, button { width: 100%; padding: 8px; margin-top: 5px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 5px; border-bottom: 1px solid #ccc; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Admin Panel</h1>
+
     <h2>Add New Booking Date</h2>
     <form id="dateForm">
       <label for="newDate">New Booking Date:</label>
       <input type="date" id="newDate" name="newDate" required />
       <button type="submit">Add Date</button>
     </form>
+    
+    <h2>Available Booking Dates</h2>
+    <ul id="datesList">
+      <!-- Available dates will be loaded here -->
+    </ul>
     
     <h2>Current Bookings</h2>
     <table id="bookingsTable">
@@ -58,6 +66,8 @@
       .then(result => {
         alert(result);
         document.getElementById("dateForm").reset();
+        // Reload available dates after adding new one
+        loadAvailableDates();
       })
       .catch(err => console.error("Error adding date:", err));
     });
@@ -78,7 +88,27 @@
         .catch(err => console.error("Error loading bookings:", err));
     }
 
-    window.addEventListener("load", loadBookings);
+    // Load available dates from the Apps Script web app and show them in a list
+    function loadAvailableDates() {
+      fetch(`${webAppUrl}?action=getDates`)
+        .then(response => response.json())
+        .then(dates => {
+          const list = document.getElementById("datesList");
+          list.innerHTML = ""; // Clear existing list items
+          dates.forEach(date => {
+            const li = document.createElement("li");
+            li.textContent = date;
+            list.appendChild(li);
+          });
+        })
+        .catch(err => console.error("Error loading available dates:", err));
+    }
+
+    // Load data when the page loads
+    window.addEventListener("load", () => {
+      loadAvailableDates();
+      loadBookings();
+    });
   </script>
 </body>
 </html>
