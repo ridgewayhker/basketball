@@ -17,7 +17,7 @@
   <div class="container">
     <h1>Admin Panel</h1>
 
-    <!-- (1) Form to Add New Booking Date -->
+    <!-- 1) Form to Add New Booking Date -->
     <h2>Add New Booking Date</h2>
     <form id="dateForm">
       <label for="newDate">New Booking Date:</label>
@@ -25,13 +25,13 @@
       <button type="submit">Add Date</button>
     </form>
     
-    <!-- (2) Dropdown for Available Dates to Filter Bookings -->
+    <!-- 2) Dropdown for Available Dates -->
     <h2>Select a Date to View Bookings</h2>
     <select id="datesDropdown">
-      <!-- Options will be populated by JavaScript -->
+      <!-- Populated by JavaScript -->
     </select>
     
-    <!-- (3) Bookings Table (Filtered by the Selected Date) -->
+    <!-- 3) Bookings Table -->
     <h2>Current Bookings</h2>
     <table id="bookingsTable">
       <thead>
@@ -42,7 +42,7 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Rows will be inserted dynamically -->
+        <!-- Inserted dynamically -->
       </tbody>
     </table>
   </div>
@@ -53,7 +53,7 @@
     let allBookings = [];
     let allDates = [];
 
-    // (1) Handle new date submission
+    // (1) Add a new date
     document.getElementById("dateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const newDate = document.getElementById("newDate").value;
@@ -71,7 +71,7 @@
       .then(result => {
         alert(result);
         document.getElementById("dateForm").reset();
-        loadAvailableDates();
+        loadAvailableDates(); // Refresh the dropdown
       })
       .catch(err => console.error("Error adding date:", err));
     });
@@ -90,17 +90,17 @@
     function populateDatesDropdown() {
       const dropdown = document.getElementById("datesDropdown");
       dropdown.innerHTML = "";
-      
-      // Option to show all bookings
+
+      // "Show All Dates" option
       const allOption = document.createElement("option");
       allOption.value = "";
       allOption.textContent = "— Show All Dates —";
       dropdown.appendChild(allOption);
-      
-      allDates.forEach(date => {
+
+      allDates.forEach(d => {
         const option = document.createElement("option");
-        option.value = date;
-        option.textContent = date;
+        option.value = d;
+        option.textContent = d;
         dropdown.appendChild(option);
       });
     }
@@ -116,30 +116,53 @@
         .catch(err => console.error("Error loading bookings:", err));
     }
 
-    // Display the given bookings in the table
+    // Display a given array of bookings in the table
     function displayBookings(bookings) {
       const tbody = document.querySelector("#bookingsTable tbody");
       tbody.innerHTML = "";
       bookings.forEach(b => {
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${b.bookingDate}</td><td>${b.teenName}</td><td>${b.parentName}</td>`;
+        // We do NOT strip the "T00:00:00.000Z"
+        row.innerHTML = `
+          <td>${b.bookingDate}</td>
+          <td>${b.teenName}</td>
+          <td>${b.parentName}</td>
+        `;
         tbody.appendChild(row);
       });
     }
 
-    // When a date is selected, filter the bookings
+    // Compare the selected date with the booking date (ignoring time if present)
+    function isSameDate(bookingVal, selectedVal) {
+      if (!selectedVal) {
+        // If no date is selected, show all
+        return true;
+      }
+      // Parse both as Date objects
+      const dBooking = new Date(bookingVal);
+      const dSelected = new Date(selectedVal);
+      
+      if (isNaN(dBooking) || isNaN(dSelected)) {
+        // If either parse fails, fallback to direct string compare
+        return bookingVal === selectedVal;
+      }
+      // Compare year, month, and day
+      return (
+        dBooking.getFullYear() === dSelected.getFullYear() &&
+        dBooking.getMonth() === dSelected.getMonth() &&
+        dBooking.getDate() === dSelected.getDate()
+      );
+    }
+
+    // Filter bookings when the dropdown changes
     document.getElementById("datesDropdown").addEventListener("change", function(e) {
       const selectedDate = e.target.value;
-      if (selectedDate) {
-        const filtered = allBookings.filter(b => b.bookingDate === selectedDate);
-        displayBookings(filtered);
-      } else {
-        displayBookings(allBookings);
-      }
+      const filtered = allBookings.filter(b => isSameDate(b.bookingDate, selectedDate));
+      displayBookings(filtered);
     });
 
-    // Load available dates and all bookings on page load
-    window.addEventListener("load", function() {
+    // Load everything on page load
+    window.addEventListener("load", () => {
       loadAvailableDates();
       loadAllBookings();
     });
