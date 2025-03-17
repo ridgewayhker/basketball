@@ -8,8 +8,9 @@
     body { font-family: Arial, sans-serif; margin: 20px; }
     .container { max-width: 500px; margin: auto; }
     label { display: block; margin-top: 10px; }
-    input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
     button { margin-top: 15px; padding: 10px 15px; }
+    #notesContainer { margin-top: 15px; border: 1px solid #ccc; padding: 10px; }
   </style>
 </head>
 <body>
@@ -20,16 +21,28 @@
       <select id="bookingDate" name="bookingDate">
         <!-- Options will be populated by JavaScript -->
       </select>
+      
       <label for="teenName">Your Name:</label>
       <input type="text" id="teenName" name="teenName" required>
+      
       <label for="parentName">Parent's Name:</label>
       <input type="text" id="parentName" name="parentName" required>
+      
+      <!-- Notes and Disclaimer Section -->
+      <div id="notesContainer">
+        <strong>Notes and Disclaimer:</strong>
+        <p id="notesText">Loading notes...</p>
+        <label>
+          <input type="checkbox" id="acceptDisclaimer" required>
+          I accept the notes and disclaimer
+        </label>
+      </div>
+      
       <button type="submit">Book Now</button>
     </form>
   </div>
   
   <script>
-    // Replace with your actual Apps Script Web App URL
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
     // Load available dates and populate the dropdown
@@ -49,9 +62,25 @@
         .catch(err => console.error("Error loading dates:", err));
     }
 
+    // Load the notes/disclaimer from the server and display it
+    function loadNotes() {
+      fetch(`${webAppUrl}?action=getNotes`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("notesText").textContent = data.note;
+        })
+        .catch(err => console.error("Error loading notes:", err));
+    }
+
     // Handle booking form submission
     document.getElementById("bookingForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      // Check that the disclaimer is accepted
+      if (!document.getElementById("acceptDisclaimer").checked) {
+        alert("Please accept the notes and disclaimer before booking.");
+        return;
+      }
+      
       const bookingDate = document.getElementById("bookingDate").value;
       const teenName = document.getElementById("teenName").value;
       const parentName = document.getElementById("parentName").value;
@@ -75,7 +104,10 @@
       .catch(err => console.error("Error submitting booking:", err));
     });
 
-    window.addEventListener("load", loadDates);
+    window.addEventListener("load", () => {
+      loadDates();
+      loadNotes();
+    });
   </script>
 </body>
 </html>
