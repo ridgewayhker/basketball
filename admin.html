@@ -7,6 +7,7 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     .container { max-width: 700px; margin: auto; }
+    h1, h2 { margin-top: 1rem; margin-bottom: 0.5rem; }
     label { display: block; margin-top: 10px; }
     input, button, select, textarea { width: 100%; padding: 8px; margin-top: 5px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -25,7 +26,17 @@
       <button type="submit">Add Date</button>
     </form>
     
-    <!-- 2) Form to Update Notes and Disclaimer -->
+    <!-- 2) Remove an Available Date -->
+    <h2>Remove an Available Date</h2>
+    <form id="removeDateForm">
+      <label for="removeDateSelect">Select a Date to Remove:</label>
+      <select id="removeDateSelect">
+        <!-- Populated by JavaScript -->
+      </select>
+      <button type="submit">Remove Date</button>
+    </form>
+    
+    <!-- 3) Form to Update Notes and Disclaimer -->
     <h2>Update Notes and Disclaimer</h2>
     <form id="notesForm">
       <label for="notesInput">Notes and Disclaimer:</label>
@@ -33,13 +44,13 @@
       <button type="submit">Update Notes</button>
     </form>
     
-    <!-- 3) Dropdown for Available Dates to Filter Bookings -->
+    <!-- 4) Dropdown for Available Dates to Filter Bookings -->
     <h2>Select a Date to View Bookings</h2>
     <select id="datesDropdown">
       <!-- Populated by JavaScript -->
     </select>
     
-    <!-- 4) Bookings Table -->
+    <!-- 5) Bookings Table -->
     <h2>Current Bookings</h2>
     <table id="bookingsTable">
       <thead>
@@ -50,18 +61,19 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Rows inserted dynamically -->
+        <!-- Rows will be inserted dynamically -->
       </tbody>
     </table>
   </div>
   
   <script>
+    // Replace with your actual Web App URL
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
     
     let allBookings = [];
     let allDates = [];
 
-    // (1) Add new date
+    // (1) Handle new date submission
     document.getElementById("dateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const newDate = document.getElementById("newDate").value;
@@ -79,12 +91,43 @@
       .then(result => {
         alert(result);
         document.getElementById("dateForm").reset();
-        loadAvailableDates();
+        loadAvailableDates(); // Refresh the lists
       })
       .catch(err => console.error("Error adding date:", err));
     });
     
-    // (2) Update notes
+    // (2) Handle removing an available date
+    document.getElementById("removeDateForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const dateToRemove = document.getElementById("removeDateSelect").value;
+      
+      if (!dateToRemove) {
+        alert("Please select a date to remove.");
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to remove the date "${dateToRemove}"?`)) {
+        return; // Admin canceled
+      }
+      
+      const params = new URLSearchParams();
+      params.append("action", "removeDate");
+      params.append("dateToRemove", dateToRemove);
+      
+      fetch(webAppUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params
+      })
+      .then(response => response.text())
+      .then(result => {
+        alert(result);
+        loadAvailableDates(); // Refresh lists
+      })
+      .catch(err => console.error("Error removing date:", err));
+    });
+
+    // (3) Handle notes update
     document.getElementById("notesForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const note = document.getElementById("notesInput").value;
@@ -115,23 +158,38 @@
         .catch(err => console.error("Error loading existing notes:", err));
     }
 
-    // (3) Load dates, sort descending, populate dropdown
+    // (4) Load all available dates (for both removeDateSelect and datesDropdown)
     function loadAvailableDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
           // Sort descending
-          dates.sort((a, b) => {
-            const da = new Date(a);
-            const db = new Date(b);
-            return db - da; // descending
-          });
+          dates.sort((a, b) => new Date(b) - new Date(a));
+          
           allDates = dates;
+          populateRemoveDateDropdown();
           populateDatesDropdown();
         })
         .catch(err => console.error("Error loading dates:", err));
     }
-    
+
+    function populateRemoveDateDropdown() {
+      const removeSelect = document.getElementById("removeDateSelect");
+      removeSelect.innerHTML = "";
+      
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "-- Select Date to Remove --";
+      removeSelect.appendChild(placeholder);
+      
+      allDates.forEach(date => {
+        const option = document.createElement("option");
+        option.value = date;
+        option.textContent = date;
+        removeSelect.appendChild(option);
+      });
+    }
+
     function populateDatesDropdown() {
       const dropdown = document.getElementById("datesDropdown");
       dropdown.innerHTML = "";
@@ -150,7 +208,7 @@
       });
     }
     
-    // (4) Load bookings
+    // (5) Load all bookings
     function loadAllBookings() {
       fetch(`${webAppUrl}?action=getBookings`)
         .then(response => response.json())
@@ -171,7 +229,7 @@
       });
     }
     
-    // Filter bookings by selected date
+    // Filter bookings when the datesDropdown changes
     document.getElementById("datesDropdown").addEventListener("change", function(e) {
       const selectedDate = e.target.value;
       if (selectedDate === "") {
