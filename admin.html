@@ -56,7 +56,6 @@
   </div>
   
   <script>
-    // Use your actual Web App URL
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
     
     let allBookings = [];
@@ -102,7 +101,6 @@
       .then(response => response.text())
       .then(result => {
         alert(result);
-        // Optionally clear the textarea or keep it
       })
       .catch(err => console.error("Error updating notes:", err));
     });
