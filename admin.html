@@ -39,6 +39,7 @@
   </div>
   
   <script>
+    // Replace with your actual web app URL from Apps Script
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
     // Handle new date submission
@@ -67,7 +68,7 @@
         .then(response => response.json())
         .then(bookings => {
           const tbody = document.querySelector("#bookingsTable tbody");
-          tbody.innerHTML = "";
+          tbody.innerHTML = ""; // Clear existing rows
           bookings.forEach(booking => {
             const row = document.createElement("tr");
             row.innerHTML = `<td>${booking.bookingDate}</td><td>${booking.teenName}</td><td>${booking.parentName}</td>`;
