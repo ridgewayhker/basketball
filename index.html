@@ -32,6 +32,7 @@
   </div>
   
   <script>
+    // Replace with your actual web app URL from Apps Script
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
     // Fetch available dates from the Apps Script web app and populate the dropdown
@@ -40,6 +41,8 @@
         .then(response => response.json())
         .then(dates => {
           const dropdown = document.getElementById("bookingDate");
+          dropdown.innerHTML = ""; // Clear any existing options
+          
           dates.forEach(date => {
             const option = document.createElement("option");
             option.value = date;
