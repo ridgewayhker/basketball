@@ -17,7 +17,7 @@
   <div class="container">
     <h1>Admin Panel</h1>
     
-    <!-- 1) Form to Add New Booking Date -->
+    <!-- (1) Form to Add New Booking Date -->
     <h2>Add New Booking Date</h2>
     <form id="dateForm">
       <label for="newDate">New Booking Date:</label>
@@ -25,7 +25,7 @@
       <button type="submit">Add Date</button>
     </form>
     
-    <!-- 2) Form to Update Notes and Disclaimer -->
+    <!-- (2) Form to Update Notes and Disclaimer -->
     <h2>Update Notes and Disclaimer</h2>
     <form id="notesForm">
       <label for="notesInput">Notes and Disclaimer:</label>
@@ -33,13 +33,13 @@
       <button type="submit">Update Notes</button>
     </form>
     
-    <!-- 3) Dropdown for Available Dates to Filter Bookings -->
+    <!-- (3) Dropdown for Available Dates to Filter Bookings -->
     <h2>Select a Date to View Bookings</h2>
     <select id="datesDropdown">
       <!-- Options will be populated by JavaScript -->
     </select>
     
-    <!-- 4) Bookings Table -->
+    <!-- (4) Bookings Table -->
     <h2>Current Bookings</h2>
     <table id="bookingsTable">
       <thead>
@@ -56,12 +56,13 @@
   </div>
   
   <script>
+    // Use your actual Apps Script Web App URL
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
     
     let allBookings = [];
     let allDates = [];
-    
-    // (1) Handle new date submission
+
+    // 1) Handle new date submission
     document.getElementById("dateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const newDate = document.getElementById("newDate").value;
@@ -84,7 +85,7 @@
       .catch(err => console.error("Error adding date:", err));
     });
     
-    // (2) Handle notes update
+    // 2) Handle notes update
     document.getElementById("notesForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const note = document.getElementById("notesInput").value;
@@ -101,13 +102,24 @@
       .then(response => response.text())
       .then(result => {
         alert(result);
-        // Optionally, clear the textarea:
+        // Optionally clear the textarea or leave it as is
         // document.getElementById("notesForm").reset();
       })
       .catch(err => console.error("Error updating notes:", err));
     });
-    
-    // (3) Load all available dates
+
+    // Load the existing note and show it in the textarea
+    function loadExistingNotes() {
+      fetch(`${webAppUrl}?action=getNotes`)
+      .then(response => response.json())
+      .then(data => {
+        // data.note is what we stored in cell A2
+        document.getElementById("notesInput").value = data.note || "";
+      })
+      .catch(err => console.error("Error loading existing notes:", err));
+    }
+
+    // 3) Load all available dates
     function loadAvailableDates() {
       fetch(`${webAppUrl}?action=getDates`)
       .then(response => response.json())
@@ -136,7 +148,7 @@
       });
     }
     
-    // (4) Load all bookings
+    // 4) Load all bookings
     function loadAllBookings() {
       fetch(`${webAppUrl}?action=getBookings`)
       .then(response => response.json())
@@ -169,8 +181,9 @@
       }
     });
     
-    // Load available dates and bookings on page load
+    // Load everything on page load
     window.addEventListener("load", () => {
+      loadExistingNotes();
       loadAvailableDates();
       loadAllBookings();
     });
