@@ -6,19 +6,18 @@
   <title>Admin Panel - Basketball Booking</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { max-width: 800px; margin: auto; }
+    .container { max-width: 700px; margin: auto; }
     label { display: block; margin-top: 10px; }
-    input, button { width: 100%; padding: 8px; margin-top: 5px; }
+    input, button, select { width: 100%; padding: 8px; margin-top: 5px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 5px; border-bottom: 1px solid #ccc; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Admin Panel</h1>
 
+    <!-- 1. Add New Booking Date -->
     <h2>Add New Booking Date</h2>
     <form id="dateForm">
       <label for="newDate">New Booking Date:</label>
@@ -26,11 +25,13 @@
       <button type="submit">Add Date</button>
     </form>
     
-    <h2>Available Booking Dates</h2>
-    <ul id="datesList">
-      <!-- Available dates will be loaded here -->
-    </ul>
+    <!-- 2. Dropdown for Available Booking Dates -->
+    <h2>Select a Date to View Bookings</h2>
+    <select id="datesDropdown">
+      <!-- Will be populated by JavaScript -->
+    </select>
     
+    <!-- 3. Table of Current Bookings (filtered by the selected date) -->
     <h2>Current Bookings</h2>
     <table id="bookingsTable">
       <thead>
@@ -48,9 +49,13 @@
   
   <script>
     // Replace with your actual web app URL from Apps Script
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
+    const webAppUrl = "YOUR_WEB_APP_URL";
 
-    // Handle new date submission
+    // We'll store all bookings and all dates in these arrays
+    let allBookings = [];
+    let allDates = [];
+
+    // 1. Add new date submission
     document.getElementById("dateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const newDate = document.getElementById("newDate").value;
@@ -66,48 +71,86 @@
       .then(result => {
         alert(result);
         document.getElementById("dateForm").reset();
-        // Reload available dates after adding new one
-        loadAvailableDates();
+        loadAvailableDates(); // Refresh the dropdown after adding a new date
       })
       .catch(err => console.error("Error adding date:", err));
     });
 
-    // Load bookings from the Apps Script web app
-    function loadBookings() {
-      fetch(`${webAppUrl}?action=getBookings`)
-        .then(response => response.json())
-        .then(bookings => {
-          const tbody = document.querySelector("#bookingsTable tbody");
-          tbody.innerHTML = ""; // Clear existing rows
-          bookings.forEach(booking => {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td>${booking.bookingDate}</td><td>${booking.teenName}</td><td>${booking.parentName}</td>`;
-            tbody.appendChild(row);
-          });
-        })
-        .catch(err => console.error("Error loading bookings:", err));
-    }
-
-    // Load available dates from the Apps Script web app and show them in a list
+    // 2. Load all available dates from the Apps Script web app
     function loadAvailableDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
-          const list = document.getElementById("datesList");
-          list.innerHTML = ""; // Clear existing list items
-          dates.forEach(date => {
-            const li = document.createElement("li");
-            li.textContent = date;
-            list.appendChild(li);
-          });
+          allDates = dates;
+          populateDatesDropdown();
         })
         .catch(err => console.error("Error loading available dates:", err));
     }
 
-    // Load data when the page loads
+    // Populate the dropdown with the available dates
+    function populateDatesDropdown() {
+      const dropdown = document.getElementById("datesDropdown");
+      dropdown.innerHTML = ""; // Clear existing options
+
+      // Optional: Add an "All Dates" option at the top
+      const allOption = document.createElement("option");
+      allOption.value = "";
+      allOption.textContent = "— Show All Dates —";
+      dropdown.appendChild(allOption);
+
+      // Add each date from the sheet
+      allDates.forEach(date => {
+        const option = document.createElement("option");
+        option.value = date;
+        option.textContent = date;
+        dropdown.appendChild(option);
+      });
+    }
+
+    // 3. Load all bookings from the Apps Script web app
+    function loadAllBookings() {
+      fetch(`${webAppUrl}?action=getBookings`)
+        .then(response => response.json())
+        .then(bookings => {
+          allBookings = bookings;
+          // Initially display all bookings (if no date selected)
+          displayBookings(allBookings);
+        })
+        .catch(err => console.error("Error loading bookings:", err));
+    }
+
+    // Filter bookings by date, then display them
+    function displayBookings(bookings) {
+      const tbody = document.querySelector("#bookingsTable tbody");
+      tbody.innerHTML = ""; // Clear existing rows
+      bookings.forEach(booking => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${booking.bookingDate}</td>
+          <td>${booking.teenName}</td>
+          <td>${booking.parentName}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Handle date dropdown change event
+    document.getElementById("datesDropdown").addEventListener("change", function(e) {
+      const selectedDate = e.target.value;
+      if (selectedDate) {
+        // Filter to show only bookings matching the selected date
+        const filtered = allBookings.filter(b => b.bookingDate === selectedDate);
+        displayBookings(filtered);
+      } else {
+        // If no date is selected, show all bookings
+        displayBookings(allBookings);
+      }
+    });
+
+    // Load data on page load
     window.addEventListener("load", () => {
       loadAvailableDates();
-      loadBookings();
+      loadAllBookings();
     });
   </script>
 </body>
