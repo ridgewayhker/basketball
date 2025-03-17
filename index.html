@@ -43,15 +43,14 @@
   </div>
   
   <script>
-    // Use your actual Web App URL
+    // Use your actual Apps Script Web App URL
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
-    // Fetch dates, sort descending, populate dropdown
+    // Sort dates in descending order
     function loadDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
         .then(dates => {
-          // Sort descending
           dates.sort((a, b) => {
             const da = new Date(a);
             const db = new Date(b);
@@ -69,12 +68,19 @@
         .catch(err => console.error("Error loading dates:", err));
     }
 
+    // Convert newlines to <br> so multiline text displays correctly
+    function multilineToHtml(str) {
+      if (!str) return "";
+      return str.replace(/\n/g, "<br>");
+    }
+
     // Load notes/disclaimer from the server
     function loadNotes() {
       fetch(`${webAppUrl}?action=getNotes`)
         .then(response => response.json())
         .then(data => {
-          document.getElementById("notesText").textContent = data.note || "";
+          const multiline = multilineToHtml(data.note);
+          document.getElementById("notesText").innerHTML = multiline;
         })
         .catch(err => console.error("Error loading notes:", err));
     }
