@@ -17,7 +17,7 @@
   <div class="container">
     <h1>Admin Panel</h1>
 
-    <!-- 1. Add New Booking Date -->
+    <!-- (1) Form to Add New Booking Date -->
     <h2>Add New Booking Date</h2>
     <form id="dateForm">
       <label for="newDate">New Booking Date:</label>
@@ -25,13 +25,13 @@
       <button type="submit">Add Date</button>
     </form>
     
-    <!-- 2. Dropdown for Available Booking Dates -->
+    <!-- (2) Dropdown for Available Dates to Filter Bookings -->
     <h2>Select a Date to View Bookings</h2>
     <select id="datesDropdown">
-      <!-- Will be populated by JavaScript -->
+      <!-- Options will be populated by JavaScript -->
     </select>
     
-    <!-- 3. Table of Current Bookings (filtered by the selected date) -->
+    <!-- (3) Bookings Table (Filtered by the Selected Date) -->
     <h2>Current Bookings</h2>
     <table id="bookingsTable">
       <thead>
@@ -42,41 +42,41 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Booking data will be loaded here -->
+        <!-- Rows will be inserted dynamically -->
       </tbody>
     </table>
   </div>
   
   <script>
-    // Replace with your actual web app URL from Apps Script
-    const webAppUrl = "YOUR_WEB_APP_URL";
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbwz6qz35i1JbJnBL7XWqW76aTCk_xr3c-3kS58mVoj-tIT9kbPQcRy3mZG3hB9vpN7d/exec";
 
-    // We'll store all bookings and all dates in these arrays
     let allBookings = [];
     let allDates = [];
 
-    // 1. Add new date submission
+    // (1) Handle new date submission
     document.getElementById("dateForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const newDate = document.getElementById("newDate").value;
+      
       const params = new URLSearchParams();
       params.append("action", "addDate");
       params.append("newDate", newDate);
       
       fetch(webAppUrl, {
         method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: params
       })
       .then(response => response.text())
       .then(result => {
         alert(result);
         document.getElementById("dateForm").reset();
-        loadAvailableDates(); // Refresh the dropdown after adding a new date
+        loadAvailableDates();
       })
       .catch(err => console.error("Error adding date:", err));
     });
 
-    // 2. Load all available dates from the Apps Script web app
+    // (2) Load all available dates
     function loadAvailableDates() {
       fetch(`${webAppUrl}?action=getDates`)
         .then(response => response.json())
@@ -84,21 +84,19 @@
           allDates = dates;
           populateDatesDropdown();
         })
-        .catch(err => console.error("Error loading available dates:", err));
+        .catch(err => console.error("Error loading dates:", err));
     }
 
-    // Populate the dropdown with the available dates
     function populateDatesDropdown() {
       const dropdown = document.getElementById("datesDropdown");
-      dropdown.innerHTML = ""; // Clear existing options
-
-      // Optional: Add an "All Dates" option at the top
+      dropdown.innerHTML = "";
+      
+      // Option to show all bookings
       const allOption = document.createElement("option");
       allOption.value = "";
       allOption.textContent = "— Show All Dates —";
       dropdown.appendChild(allOption);
-
-      // Add each date from the sheet
+      
       allDates.forEach(date => {
         const option = document.createElement("option");
         option.value = date;
@@ -107,48 +105,41 @@
       });
     }
 
-    // 3. Load all bookings from the Apps Script web app
+    // (3) Load all bookings
     function loadAllBookings() {
       fetch(`${webAppUrl}?action=getBookings`)
         .then(response => response.json())
         .then(bookings => {
           allBookings = bookings;
-          // Initially display all bookings (if no date selected)
           displayBookings(allBookings);
         })
         .catch(err => console.error("Error loading bookings:", err));
     }
 
-    // Filter bookings by date, then display them
+    // Display the given bookings in the table
     function displayBookings(bookings) {
       const tbody = document.querySelector("#bookingsTable tbody");
-      tbody.innerHTML = ""; // Clear existing rows
-      bookings.forEach(booking => {
+      tbody.innerHTML = "";
+      bookings.forEach(b => {
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${booking.bookingDate}</td>
-          <td>${booking.teenName}</td>
-          <td>${booking.parentName}</td>
-        `;
+        row.innerHTML = `<td>${b.bookingDate}</td><td>${b.teenName}</td><td>${b.parentName}</td>`;
         tbody.appendChild(row);
       });
     }
 
-    // Handle date dropdown change event
+    // When a date is selected, filter the bookings
     document.getElementById("datesDropdown").addEventListener("change", function(e) {
       const selectedDate = e.target.value;
       if (selectedDate) {
-        // Filter to show only bookings matching the selected date
         const filtered = allBookings.filter(b => b.bookingDate === selectedDate);
         displayBookings(filtered);
       } else {
-        // If no date is selected, show all bookings
         displayBookings(allBookings);
       }
     });
 
-    // Load data on page load
-    window.addEventListener("load", () => {
+    // Load available dates and all bookings on page load
+    window.addEventListener("load", function() {
       loadAvailableDates();
       loadAllBookings();
     });
